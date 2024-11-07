@@ -3,7 +3,20 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
     /**
      * @brief Page Create
      */
-    var onPageCreate = function () {};
+    var onPageCreate = function () {
+      var cursorUrl = "./asset/mouse.png";
+      document.body.style.cursor = "url('" + cursorUrl + "'), auto";
+      $W("", undefined, { multiple: true, like: true }).forEach(function (wgt) {
+        if (wgt.get("label").indexOf("b$") > -1) {
+          setTimeout(function () {
+            wgt.tag.style.cursor = "url('" + cursorUrl + "'), auto";
+          }, 100);
+        } else {
+          wgt.tag.style.cursor = "url('" + cursorUrl + "'), auto";
+        }
+      });
+      set("$cursor:url", cursorUrl);
+    };
 
     /**
      * @brief Page Run
@@ -16,8 +29,9 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
     var onClickTab = function () {
       var target = Event.target;
       $W("mlc$card").changeState("Layer" + target.get("label").split("_")[1]);
+      $W("a$click").changeState("Play");
     };
-    
+
     /**
      * @brief 메뉴 네비게이션 시
      */
@@ -26,21 +40,27 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       var targetNum = target.get("label").split("_")[1];
       window.location.href = "../sub_" + targetNum + "/index.html";
     };
-    
+
     /**
      * @brief 메뉴 버튼 클릭 시
      */
     var onClickMenu = function () {
-        var target = Event.target;
-        var menu = $W("mlc$menu");
-        
-        target.local.isVisible = !target.local.isVisible;
-        
-        target.set("visibility", "visibleEventPass");
-        
-        menu.moveTo("", !target.local.isVisible ? -1080 : 0, {timing:"linear 500ms",onEnd:function(){
-            target.set("visibility", "visible");
-        }});
+      var target = Event.target;
+      var menu = $W("mlc$menu");
+
+      target.local.isVisible = !target.local.isVisible;
+
+      target.set("visibility", "visibleEventPass");
+
+      menu.moveTo("", !target.local.isVisible ? -1080 : 0, {
+        timing: "linear 500ms",
+        onEnd: function () {
+          target.set("visibility", "visible");
+          target.tag.style.cursor = "url('" + get("$cursor:url") + "'), auto";
+        },
+      });
+      target.rotateTo(!target.local.isVisible ? 0 : -45, {timing:"linear 500ms"});
+      $W("a$click").changeState("Play");
     };
 
     if (!Event.target) {
@@ -60,6 +80,19 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
           onClickMenu();
         } else if (label == "ia$home") {
           window.location.href = "../main/index.html";
+        } else if(label == "i$popup") {
+          $W("mlc$popup").zIndexTo("Top");
+          $W("mlc$popup").moveTo(0,0);
+          $W("a$click").changeState("Play");
+        } else if(label == "i$exit") {
+          $W("mlc$popup").moveTo(1920,0);
+          $W("a$click").changeState("Play");
+        }
+      } else if(Event.type == "Media") {
+        if(label == "v$video") {
+            if(Event.param == "End") {
+                Event.target.changeState("Play");
+            }
         }
       }
     }
