@@ -1,78 +1,46 @@
 var popupDir = {
   miniOops: ["R", "R", "R", "R", "L", "L", "L", "L", "L", "L"],
   oops: ["R", "R", "R", "R", "R", "R", "R", "L", "L", "L", "L", "L", "L"],
-  megaOops: [
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "R",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-    "L",
-  ],
-  system: [
-    "L",
-    "L",
-    "R",
-    "R",
-    "R",
-    "L",
-    "R",
-    "R",
-    "L",
-    "L",
-    "R",
-    "R",
-    "L",
-    "R",
-    "R",
-    "R",
-  ],
+  megaOops: ["R", "R", "R", "R", "R", "R", "R", "R", "R", "R", "L", "L", "L", "L", "L", "L", "L", "L", "L", "L"],
+  system: ["L", "L", "R", "R", "R", "L", "R", "R", "L", "L", "R", "R", "L", "R", "R", "R"],
 };
 
 apx.addEventListener("pageBubble", function (Event, ctx) {
   with (ctx) {
+
     /**
-     * @brief Page Create
+     * @brief 페이지 초기화 설정
      */
     var onPageCreate = function () {
       set("$is:playing", false);
       var cursorUrl = "./asset/mouse.png";
-      document.body.style.cursor = "url('" + cursorUrl + "'), auto";
+      document.body.style.cursor = `url('${cursorUrl}'), auto`;
       $W("", undefined, { multiple: true, like: true }).forEach(function (wgt) {
-        if (wgt.get("label").indexOf("btn") > -1) {
-          setTimeout(function () {
-            wgt.tag.style.cursor = "url('" + cursorUrl + "'), auto";
+        if (wgt.get("label").includes("btn")) {
+          setTimeout(() => {
+            wgt.tag.style.cursor = `url('${cursorUrl}'), auto`;
           }, 1000);
         } else {
-          wgt.tag.style.cursor = "url('" + cursorUrl + "'), auto";
+          wgt.tag.style.cursor = `url('${cursorUrl}'), auto`;
         }
       });
       $W("Popup", undefined, { multiple: true, like: true }).forEach(function (popup) {
         // [수정] : 팝업 창 크기 변경 (단위 %)
-        popup.zoomTo(130, 130);    
+        popup.zoomTo(130, 130);
       });
+      if (getQueryParamValue("home") !== null) {
+        $W("i$home").set("visibility", "hidden");
+      }
     };
 
     /**
-     * @brief Page Run
+     * @brief 페이지 실행 로직
      */
     var onPageRun = function () {};
 
-    // 에러 메시지 클릭 시
+    /**
+     * @brief 에러 메시지 클릭 이벤트 처리
+     */
     var onClickErrorMsg = function () {
       var msg = $W("mlc$errorMsg");
       if (msg.get("visibility") == "hidden") {
@@ -99,7 +67,9 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       $W("a$click").changeState("Play");
     };
 
-    // 핑크색 파일 클릭 시
+    /**
+     * @brief 폴더 클릭 시 팝업 처리
+     */
     var onClickFolder = function () {
       onClickBg();
       if (get("$is:playing")) {
@@ -114,10 +84,7 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       var content = $W(label.replace("Folder", "Content").replace("mlc", "mt"));
 
       var type = label.replace("Folder", "").replace("mlc$", "").split("_")[0];
-      var typeIndex = label
-        .replace("Folder", "")
-        .replace("mlc$", "")
-        .split("_")[1];
+      var typeIndex = label.replace("Folder", "").replace("mlc$", "").split("_")[1];
       var flagLR = popupDir[type][typeIndex - 1];
 
       $W("i$bg").local.playingObjs = {
@@ -137,57 +104,46 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       if (flagLR == "R") {
         popup.moveTo(target.get("x"), target.get("y") + topMargin);
       } else {
-        popup.moveTo(
-          target.get("x") - popup.get("w") + target.get("w"),
-          target.get("y") + topMargin
-        );
+        popup.moveTo(target.get("x") - popup.get("w") + target.get("w"), target.get("y") + topMargin);
       }
-      
+
       target.zoomTo(120, 120, {
         timing: "ease-in-out 500ms",
         onEnd: function () {
           // [수정] : 팝업창 간 간격 값 변경 (단위 px)
-          popup.moveTo(
-            target.get("x") + (flagLR == "R" ? 220 : -405),
-            target.get("y") + topMargin,
-            {
-              timing: "linear 500ms",
-              onEnd: function () {
-                // 타이틀 보여짐
-                title.moveTo("", title.get("y") + 10);
-                title.set("visibility", "visible");
-                title.moveTo("", title.get("y") - 10, {
-                  timing: "linear 500ms",
-                  onEnd: function () {
-                    // 내용 보여짐
-                    content.moveTo("", content.get("y") + 10);
-                    content.set("visibility", "visible");
-                    content.moveTo("", content.get("y") - 10, {
-                      timing: "linear 500ms",
-                      onEnd: function () {
-                        content.set("visibility", "visible");
-                        set("$is:playing", false);
-                      },
-                    });
-                  },
-                });
-              },
-            }
-          );
+          popup.moveTo(target.get("x") + (flagLR == "R" ? 220 : -405), target.get("y") + topMargin, {
+            timing: "linear 500ms",
+            onEnd: function () {
+              title.moveTo("", title.get("y") + 10);
+              title.set("visibility", "visible");
+              title.moveTo("", title.get("y") - 10, {
+                timing: "linear 500ms",
+                onEnd: function () {
+                  content.moveTo("", content.get("y") + 10);
+                  content.set("visibility", "visible");
+                  content.moveTo("", content.get("y") - 10, {
+                    timing: "linear 500ms",
+                    onEnd: function () {
+                      content.set("visibility", "visible");
+                      set("$is:playing", false);
+                    },
+                  });
+                },
+              });
+            },
+          });
           popup.set("visibility", "visible");
         },
       });
       $W("a$click").changeState("Play");
     };
 
-    // 배경 클릭
+    /**
+     * @brief 배경 클릭 시 이벤트 처리
+     */
     var onClickBg = function () {
       var target = $W("i$bg");
-      if (
-        get("$is:playing") ||
-        !target.local.playingObjs ||
-        Object.keys(target.local.playingObjs).length === 0
-      ) {
+      if (get("$is:playing") || !target.local.playingObjs || Object.keys(target.local.playingObjs).length === 0) {
         return;
       }
 
@@ -200,7 +156,9 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       playingObjs = {};
     };
 
-    // 스크롤 이벤트
+    /**
+     * @brief 스크롤 이벤트 처리
+     */
     var onScrollEvent = function () {
       var scrollY = Event.target.getData("scrollY");
       if (scrollY >= 800 && scrollY <= 900) {
@@ -216,6 +174,16 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       }
     };
 
+    /**
+     * @brief URL 쿼리 파라미터값 가져오기
+     * @param {string} paramName - 파라미터 이름
+     * @returns {string|null} 파라미터 값
+     */
+    var getQueryParamValue = function (paramName) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(paramName);
+    };
+
     if (!Event.target) {
       if (Event.type === "Page Create") {
         onPageCreate();
@@ -227,7 +195,7 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
       if (Event.type == "Tap") {
         if (label == "i$errorMsg") {
           onClickErrorMsg();
-        } else if (label.indexOf("Folder_") > -1) {
+        } else if (label.includes("Folder_")) {
           onClickFolder();
         } else if (label == "i$bg") {
           onClickBg();
@@ -236,7 +204,7 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
         }
       } else if (Event.type == "Widget Event") {
         if (label == "sa$scroll") {
-          //onScrollEvent();
+          onScrollEvent();
         }
       }
     }
