@@ -28,6 +28,11 @@ apx.addEventListener("pageBubble", function (Event, ctx) {
         // [수정] : 팝업 창 크기 변경 (단위 %)
         popup.zoomTo(130, 130);
       });
+      $W("mt$systemContent_", undefined, { multiple: true, like: true }).forEach(function (systemContent) {
+        systemContent.set("textColor","#ffffff");
+        console.log("DD");
+      });
+      
       if (getQueryParamValue("home") !== null) {
         $W("i$home").set("visibility", "hidden");
       }
